@@ -1,0 +1,32 @@
+{
+  "name": "ask-anything-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EllaAro/ask-anything-server.git"
+  },
+  "author": "Ella Aro",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/EllaAro/ask-anything-server/issues"
+  },
+  "homepage": "https://github.com/EllaAro/ask-anything-server#readme",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1",
+    "express-graphql": "^0.9.0",
+    "express-handlebars": "^4.0.4",
+    "graphql": "^15.0.0",
+    "multer": "^1.4.2",
+    "mysql2": "^2.1.0",
+    "nodemon": "^2.0.3",
+    "sequelize": "^5.21.8",
+    "validator": "^13.0.0"
+  }
+}
