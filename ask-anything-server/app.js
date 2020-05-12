@@ -2,7 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const graphqlHttp = require('express-graphql');
 
-const sequelize = require('./util/database');
+const { sequelize } = require('./util/database');
 const graphqlSchema = require('./graphql/schema');
 const graphqlResolver = require('./graphql/resolvers');
 
@@ -42,14 +42,13 @@ app.use((error, req, res, next) => {
   res.status(status).json({ message: message, data: data });
 });
 
- sequelize.sync({force: true})
-  .then(result => {
+sequelize.sync({ force: true })
+  .then(() => {
     app.listen(8080);
   })
   .catch(err => {
     console.log(err);
   });
-
 
   
   
