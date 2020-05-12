@@ -3,14 +3,12 @@ const bodyParser = require('body-parser');
 const graphqlHttp = require('express-graphql');
 
 const sequelize = require('./util/database');
-const path = require('path');
 const graphqlSchema = require('./graphql/schema');
 const graphqlResolver = require('./graphql/resolvers');
 
 app = express();
 
 app.use(bodyParser.json()); 
-
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader(
@@ -44,10 +42,8 @@ app.use((error, req, res, next) => {
   res.status(status).json({ message: message, data: data });
 });
 
-sequelize
-  .sync()
+ sequelize.sync({force: true})
   .then(result => {
-    // console.log(result);
     app.listen(8080);
   })
   .catch(err => {
