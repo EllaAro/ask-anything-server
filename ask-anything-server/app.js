@@ -2,7 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const graphqlHttp = require('express-graphql');
 
-const { sequelize } = require('./util/database');
+const { sequelize } = require('./models');
 const graphqlSchema = require('./graphql/schema');
 const graphqlResolver = require('./graphql/resolvers');
 

@@ -1,4 +1,4 @@
-const Post = require('../models/post');
+const { Post } = require('../models');
 const validator = require('validator');
 
 const checkIfEmpty = ( field, fieldName, errorArr ) => {
@@ -8,19 +8,20 @@ const checkIfEmpty = ( field, fieldName, errorArr ) => {
 
 module.exports = {
     createPost: async function({ postInput }, req) {
-        const errors = [];
+        let errors = [];
         errors = checkIfEmpty(postInput.title, 'title', errors);
         errors = checkIfEmpty(postInput.content, 'post content', errors);
         if (errors.length > 0) {
-            const error = new Error('Invalid input.');
+            let error = new Error('Invalid input.');
             error.data = errors;
             error.code = 422;
             throw error;
           }
 
-        const createdPost = await Post.create({
+        let createdPost = await Post.create({
             title: postInput.title,
             content: postInput.content,
+            tags: postInput.tags
         });
 
         return {

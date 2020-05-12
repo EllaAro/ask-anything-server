@@ -13,6 +13,7 @@ module.exports = buildSchema(`
    input postInputData {
         title: String!
         content: String!
+        tags: [String!]!
    }
     type RootMutation {
         createPost(postInput: postInputData): Post!
