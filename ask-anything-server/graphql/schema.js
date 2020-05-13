@@ -6,6 +6,7 @@ module.exports = buildSchema(`
         _id: ID!
         title: String!
         content: String!
+        tags: [String!]!
         createdAt: String!
         updatedAt: String!
     }
@@ -20,7 +21,7 @@ module.exports = buildSchema(`
    }
 
    type RootQuery {
-        hello: String!
+        fetchAllPosts: [Post!]!
     }
 
     schema {

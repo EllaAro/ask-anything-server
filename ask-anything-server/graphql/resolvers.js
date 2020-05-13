@@ -7,7 +7,7 @@ const checkIfEmpty = ( field, fieldName, errorArr ) => {
 }
 
 module.exports = {
-    createPost: async function({ postInput }, req) {
+    createPost: async ({ postInput }, req) => {
         let errors = [];
         errors = checkIfEmpty(postInput.title, 'title', errors);
         errors = checkIfEmpty(postInput.content, 'post content', errors);
@@ -28,9 +28,24 @@ module.exports = {
             _id: createdPost.id.toString(),
             title: createdPost.title.toString(),
             content: createdPost.content.toString(),
+            tags: createPost.tags,
             createdAt: createdPost.createdAt.toString(),
             updatedAt: createdPost.updatedAt.toString(),
           };
+    },
+    fetchAllPosts: async (args, req) => {
+        const fetchedPosts = await Post.findAll();
+        const posts = fetchedPosts.map(post => {
+            return {
+                _id: post.id.toString(),
+                title: post.title.toString(),
+                content: post.content.toString(),
+                tags: post.tags,
+                createdAt: post.createdAt.toString(),
+                updatedAt: post.updatedAt.toString(),
+            }
+        })
+        return posts;
     }
 };
 
