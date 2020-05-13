@@ -1,4 +1,5 @@
 const express = require('express');
+const cors = require('cors');
 const bodyParser = require('body-parser');
 const graphqlHttp = require('express-graphql');
 
@@ -6,19 +7,19 @@ const { sequelize } = require('./models');
 const graphqlSchema = require('./graphql/schema');
 const graphqlResolver = require('./graphql/resolvers');
 
-app = express();
+// return instance of the app
+app = express(); 
 
+// setting up the cors config
+app.use(cors({
+    origin: '*'
+}));
+
+// tell the app to parse the body of the request
+app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json()); 
-app.use((req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader(
-      'Access-Control-Allow-Methods',
-      'OPTIONS, GET, POST, PUT, PATCH, DELETE'
-    );
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    next();
-  });
 
+// setting the graphql route 
 app.use('/graphql', graphqlHttp({
     schema: graphqlSchema,
     rootValue: graphqlResolver,
