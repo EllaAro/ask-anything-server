@@ -1,12 +1,46 @@
-const { Post } = require('../models');
+const bcrypt = require('bcryptjs');
 const validator = require('validator');
+
+const { Post, User } = require('../models');
+const { EMAIL_LENGTH } = require('../utils/consts');
 
 const checkIfEmpty = ( field, fieldName, errorArr ) => {
     if( validator.isEmpty(field) ) errorArr.push({ message: `${fieldName} is empty!` });
     return errorArr;
 }
 
+const userInputErrors = userInput => {
+    errors = [];
+    if (!validator.isEmail(userInput.email)) errors.push( { message: 'The Email is invalid!' } );
+    if (validator.isEmpty(userInput.password) || !validator.isLength(userInput.password, { min: EMAIL_LENGTH, max: EMAIL_LENGTH })) errors.push( { message: 'The password is incorrect!' } );
+    
+    return errors;
+}
+
 module.exports = {
+    createUser: async ({ userInput }, req) => {
+    
+        if (userInputErrors(userInput).length > 0) throw new Error('Invalid user input');
+        const existingUser = await User.findOne({ where: {email: userInput.email} });
+        if (existingUser) throw new Error('User already exists!');
+    
+        const hashedPwd = await bcrypt.hash(userInput.password, 12);
+        let createdUser = await User.create({
+            firstName: userInput.firstName,
+            lastName: userInput.lastName,
+            email: userInput.email,
+            password: hashedPwd,
+        })
+
+        return {
+            _id: createdUser.id.toString(),
+            firstName: createdUser.firstName.toString(),
+            lastName: createdUser.lastName.toString(),
+            email: createdUser.email.toString(),
+            createdAt: createdUser.createdAt.toString(),
+            updatedAt: createdUser.updatedAt.toString(),
+        }
+    },
     createPost: async ({ postInput }, req) => {
         let errors = [];
         errors = checkIfEmpty(postInput.title, 'title', errors);
@@ -21,7 +55,7 @@ module.exports = {
         let createdPost = await Post.create({
             title: postInput.title,
             content: postInput.content,
-            tags: postInput.tags
+            tags: postInput.tags,
         });
 
         return {
@@ -46,7 +80,7 @@ module.exports = {
             }
         })
         return posts;
-    }
+    },
 };
 
 
