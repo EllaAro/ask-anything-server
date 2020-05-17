@@ -17,10 +17,20 @@ const userInputErrors = userInput => {
     return errors;
 }
 
+const errorData = errors => {
+    if (errors.length > 0) {
+        let error = new Error('Invalid user input.');
+        error.data = errors;
+        error.code = 422;
+        return error;
+    }
+}
+
 module.exports = {
     createUser: async ({ userInput }, req) => {
     
-        if (userInputErrors(userInput).length > 0) throw new Error('Invalid user input');
+        if ( errorData(userInputErrors(userInput)) ) throw errorData(userInputErrors(userInput));
+        
         const existingUser = await User.findOne({ where: {email: userInput.email} });
         if (existingUser) throw new Error('User already exists!');
     
