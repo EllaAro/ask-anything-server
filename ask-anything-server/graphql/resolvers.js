@@ -4,35 +4,56 @@ const validator = require('validator');
 const { Post, User } = require('../models');
 const { EMAIL_LENGTH } = require('../utils/consts');
 
-const checkIfEmpty = ( field, fieldName, errorArr ) => {
-    if( validator.isEmpty(field) ) errorArr.push({ message: `${fieldName} is empty!` });
-    return errorArr;
+const EmptyFieldErrorMessage = ( field, fieldName ) => {
+    if( validator.isEmpty(field) ) return { message: `${fieldName} is empty!` };
 }
 
-const userInputErrors = userInput => {
+const inValidEmailErrorMessage = (email) => {
+    if (!validator.isEmail(email)) return { message: 'The Email is invalid!' };
+}
+
+const invalidPasswordErrorMessage = (password) => {
+    if (validator.isEmpty(password) || 
+        !validator.isLength(password, { min: EMAIL_LENGTH, max: EMAIL_LENGTH })) return { message: 'The password is incorrect!' } ;
+}
+
+const userInputErrors = ({ email, password }) => {
     errors = [];
-    if (!validator.isEmail(userInput.email)) errors.push( { message: 'The Email is invalid!' } );
-    if (validator.isEmpty(userInput.password) || !validator.isLength(userInput.password, { min: EMAIL_LENGTH, max: EMAIL_LENGTH })) errors.push( { message: 'The password is incorrect!' } );
+    if (inValidEmailErrorMessage(email)) errors.push(inValidEmailErrorMessage(email));
+    if (invalidPasswordErrorMessage(password)) errors.push(invalidPasswordErrorMessage(password));
     
     return errors;
 }
 
-const errorData = errors => {
-    if (errors.length > 0) {
-        let error = new Error('Invalid user input.');
-        error.data = errors;
-        error.code = 422;
-        return error;
-    }
+const invalidUserInputError = errors => {
+    let error = new Error('Invalid user input.');
+    error.data = errors;
+    error.code = 422;
+
+    return error;
+}
+
+const userDoesntExistError = () => {
+    const error = new Error (`User doesn't exist!`);
+    error.code = 401;
+
+    return error;
+}
+
+const userAlreadyExistsError = () => {
+    const error = new Error ('User already exists!');
+    error.code = 422;
+
+    return error;
 }
 
 module.exports = {
-    createUser: async ({ userInput }, req) => {
-    
-        if ( errorData(userInputErrors(userInput)) ) throw errorData(userInputErrors(userInput));
+    createUser: async ({ userInput }) => {
+        const errors = userInputErrors(userInput);
+        if ( errors.length > 0 ) throw  invalidUserInputError(errors);
         
         const existingUser = await User.findOne({ where: {email: userInput.email} });
-        if (existingUser) throw new Error('User already exists!');
+        if (existingUser) throw userAlreadyExistsError();
     
         const hashedPwd = await bcrypt.hash(userInput.password, 12);
         let createdUser = await User.create({
@@ -51,16 +72,18 @@ module.exports = {
             updatedAt: createdUser.updatedAt.toString(),
         }
     },
+    login: async ({loginInput}) => {
+
+        const user = await User.findOne({ where: {email: loginInput.email} });
+        if (!user) throw userDoesntExistError();
+
+
+    },
     createPost: async ({ postInput }, req) => {
         let errors = [];
-        errors = checkIfEmpty(postInput.title, 'title', errors);
-        errors = checkIfEmpty(postInput.content, 'post content', errors);
-        if (errors.length > 0) {
-            let error = new Error('Invalid input.');
-            error.data = errors;
-            error.code = 422;
-            throw error;
-          }
+        if( EmptyFieldErrorMessage(postInput.title, 'title')) errors.push(EmptyFieldErrorMessage(postInput.title, 'title'));
+        if( EmptyFieldErrorMessage(postInput.content, 'post content')); errors.push(EmptyFieldErrorMessage(postInput.content, 'post content'));
+        if ( errors.length > 0 ) throw errorData(errors);
 
         let createdPost = await Post.create({
             title: postInput.title,
