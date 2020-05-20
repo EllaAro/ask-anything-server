@@ -16,6 +16,13 @@ const sequelize = new Sequelize('ask-anything','postgres','ellaaronov',{
 const User = UserModel(sequelize, Sequelize);
 const Post = PostModel(sequelize, Sequelize);
 
+Post.belongsTo(User, {
+  constraints: true, 
+  onDelete: 'CASCADE'
+});
+
+User.hasMany(Post);
+
 module.exports = {
   User,
   Post,

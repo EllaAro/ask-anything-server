@@ -83,6 +83,13 @@ const postTagsInvalidError = ()  => {
     return error;
 }
 
+const userNotAutoError = () => {
+    const error = new Error('User is not authenticated!');
+    error.code = 401;
+    
+    return error;
+}
+
 module.exports = {
     createUser: async ({ userInput }) => {
         const errors = userInputErrors(userInput);
@@ -130,6 +137,11 @@ module.exports = {
         return { token: token, userId: user.id.toString() };
     },
     createPost: async ({ postInput }, req) => {
+
+        if (!req.isAuto) throw userNotAutoError();
+        
+        const user = await User.findByPk(req.userId);
+        if (!user) throw userDoesntExistError();
         
         const { title, content, tags } = postInput;
 
@@ -141,6 +153,7 @@ module.exports = {
             title: title,
             content: content,
             tags: tags,
+            userId: user.id
         });
 
         return {
@@ -153,6 +166,9 @@ module.exports = {
           };
     },
     fetchAllPosts: async (args, req) => {
+
+        if (!req.isAuto) throw userNotAutoError();
+
         const fetchedPosts = await Post.findAll();
         const posts = fetchedPosts.map(post => {
             return {

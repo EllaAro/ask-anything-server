@@ -22,12 +22,5 @@ module.exports = (sequelize, Sequelize) => {
 
     });
 
-    Post.associate = (models) => {
-        Post.belongsTo(models.User, {
-            constraints: true, 
-            onDelete: 'CASCADE'
-        });
-    }
-
     return Post;
 }

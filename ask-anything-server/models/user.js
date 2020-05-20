@@ -26,9 +26,5 @@ module.exports = (sequelize, Sequelize) => {
         }
     })
     
-    User.associate = (models) => {
-        User.hasMany(models.Post);
-    }
-
     return User;
 }
