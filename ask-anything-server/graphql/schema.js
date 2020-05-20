@@ -40,7 +40,7 @@ module.exports = buildSchema(`
         tags: [String!]!
    }
 
-   input loggedInUserData {
+   input signedInUserData {
         email: String!
         password: String!
    }
@@ -51,7 +51,7 @@ module.exports = buildSchema(`
    }
 
    type RootQuery {
-        login(loginInput: loggedInUserData): AutoData!
+        signIn(signinInput: signedInUserData): AutoData!
         fetchAllPosts: [Post!]!
     }
 

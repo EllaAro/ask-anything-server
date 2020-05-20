@@ -6,6 +6,7 @@ const graphqlHttp = require('express-graphql');
 const { sequelize } = require('./models');
 const graphqlSchema = require('./graphql/schema');
 const graphqlResolver = require('./graphql/resolvers');
+const auto = require('./middleware/auth');
 
 // return instance of the app
 app = express(); 
@@ -18,6 +19,9 @@ app.use(cors({
 // tell the app to parse the body of the request
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json()); 
+
+// tell the app to go through the middleware before procceeding to graphql
+app.use(auto);
 
 // setting the graphql route 
 app.use('/graphql', graphqlHttp({

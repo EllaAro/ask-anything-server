@@ -1,12 +1,14 @@
 const bcrypt = require('bcryptjs');
 const validator = require('validator');
+const jwt = require('jsonwebtoken');
 
 const { Post, User } = require('../models');
-const { EMAIL_LENGTH } = require('../utils/consts');
-
-const EmptyFieldErrorMessage = ( field, fieldName ) => {
-    if( validator.isEmpty(field) ) return { message: `${fieldName} is empty!` };
-}
+const { EMAIL_LENGTH,
+        MIN_VALID_POST_TITLE,
+        MAX_VALID_POST_TITLE,
+        MIN_VALID_POST_CONTENT,
+        MAX_VALID_POST_CONTENT,
+      } = require('../utils/consts');
 
 const inValidEmailErrorMessage = (email) => {
     if (!validator.isEmail(email)) return { message: 'The Email is invalid!' };
@@ -21,7 +23,7 @@ const userInputErrors = ({ email, password }) => {
     errors = [];
     if (inValidEmailErrorMessage(email)) errors.push(inValidEmailErrorMessage(email));
     if (invalidPasswordErrorMessage(password)) errors.push(invalidPasswordErrorMessage(password));
-    
+
     return errors;
 }
 
@@ -43,6 +45,40 @@ const userDoesntExistError = () => {
 const userAlreadyExistsError = () => {
     const error = new Error ('User already exists!');
     error.code = 422;
+
+    return error;
+}
+
+const userPasswordIsIncorrectError = () => {
+    const error = new Error ('The password you have entered is incorrect!');
+    error.code = 401;
+
+    return error;
+}
+
+const isPostTitleValid = title => title.length >= MIN_VALID_POST_TITLE && title.length <= MAX_VALID_POST_TITLE;
+
+const postTitleInvalidError = ()  => {
+    const error = new Error ('The title you have entered is inalid!');
+    error.code = 401;
+
+    return error;
+}
+
+const isPostContentValid = content => content.length>= MIN_VALID_POST_CONTENT && content.length <= MAX_VALID_POST_CONTENT;
+
+const postContentInvalidError = ()  => {
+    const error = new Error ('The content you have entered is inalid!');
+    error.code = 401;
+
+    return error;
+}
+
+const isTagsContentValid = tags => tags.length > 0;
+
+const postTagsInvalidError = ()  => {
+    const error = new Error ('The length of the tags it soo short, choose atleast one tag!');
+    error.code = 401;
 
     return error;
 }
@@ -72,23 +108,39 @@ module.exports = {
             updatedAt: createdUser.updatedAt.toString(),
         }
     },
-    login: async ({loginInput}) => {
+    signIn: async ({signinInput}) => {
 
-        const user = await User.findOne({ where: {email: loginInput.email} });
+        const user = await User.findOne({ where: {email: signinInput.email} });
         if (!user) throw userDoesntExistError();
 
+        const isEqual = await bcrypt.compare(signinInput.password, user.password);
+        if (!isEqual) throw userPasswordIsIncorrectError();
 
+        const token = jwt.sign(
+            {
+            userId: user.id.toString(),
+            email: user.email,
+            }, 
+            'somethingsupersecret', 
+            { 
+                expiresIn:'1h' 
+            }
+        );
+        
+        return { token: token, userId: user.id.toString() };
     },
     createPost: async ({ postInput }, req) => {
-        let errors = [];
-        if( EmptyFieldErrorMessage(postInput.title, 'title')) errors.push(EmptyFieldErrorMessage(postInput.title, 'title'));
-        if( EmptyFieldErrorMessage(postInput.content, 'post content')); errors.push(EmptyFieldErrorMessage(postInput.content, 'post content'));
-        if ( errors.length > 0 ) throw errorData(errors);
+        
+        const { title, content, tags } = postInput;
+
+        if (!isPostTitleValid(title)) throw postTitleInvalidError();
+        if (!isPostContentValid(content)) throw postContentInvalidError();
+        if (!isTagsContentValid(tags)) throw postTagsInvalidError();
 
         let createdPost = await Post.create({
-            title: postInput.title,
-            content: postInput.content,
-            tags: postInput.tags,
+            title: title,
+            content: content,
+            tags: tags,
         });
 
         return {
