@@ -111,30 +111,36 @@ module.exports = {
             firstName: createdUser.firstName.toString(),
             lastName: createdUser.lastName.toString(),
             email: createdUser.email.toString(),
-            createdAt: createdUser.createdAt.toString(),
-            updatedAt: createdUser.updatedAt.toString(),
+            createdAt: createdUser.createdAt.toISOString(),
+            updatedAt: createdUser.updatedAt.toISOString(),
         }
     },
     signIn: async ({signinInput}) => {
 
-        const user = await User.findOne({ where: {email: signinInput.email} });
-        if (!user) throw userDoesntExistError();
+       try {
+           const user = await User.findOne({ where: {email: signinInput.email} });
+            if (!user) throw userDoesntExistError();
 
-        const isEqual = await bcrypt.compare(signinInput.password, user.password);
-        if (!isEqual) throw userPasswordIsIncorrectError();
+            const isEqual = await bcrypt.compare(signinInput.password, user.password);
+            if (!isEqual) throw userPasswordIsIncorrectError();
 
-        const token = jwt.sign(
-            {
-            userId: user.id.toString(),
-            email: user.email,
-            }, 
-            'somethingsupersecret', 
-            { 
-                expiresIn:'1h' 
+            const token = jwt.sign(
+                {
+                userId: user.id.toString(),
+                email: user.email,
+                }, 
+                'somesupersecretsecret', 
+                { 
+                    expiresIn:'1h' 
+                }
+            );
+            res.status(200).json({ token: token, userId: user.id.toString() });
+        } catch (err) {
+            if (!err.statusCode) {
+              err.statusCode = 500;
             }
-        );
-        
-        return { token: token, userId: user.id.toString() };
+            next(err);
+        }
     },
     createPost: async ({ postInput }, req) => {
 
@@ -142,7 +148,7 @@ module.exports = {
         
         const user = await User.findByPk(req.userId);
         if (!user) throw userDoesntExistError();
-        
+
         const { title, content, tags } = postInput;
 
         if (!isPostTitleValid(title)) throw postTitleInvalidError();
@@ -161,8 +167,9 @@ module.exports = {
             title: createdPost.title.toString(),
             content: createdPost.content.toString(),
             tags: createPost.tags,
-            createdAt: createdPost.createdAt.toString(),
-            updatedAt: createdPost.updatedAt.toString(),
+            userId: createdPost.userId.toString(),
+            createdAt: createdPost.createdAt.toISOString(),
+            updatedAt: createdPost.updatedAt.toISOString(),
           };
     },
     fetchAllPosts: async (args, req) => {
@@ -172,14 +179,18 @@ module.exports = {
         const fetchedPosts = await Post.findAll();
         const posts = fetchedPosts.map(post => {
             return {
-                _id: post.id.toString(),
-                title: post.title.toString(),
-                content: post.content.toString(),
-                tags: post.tags,
-                createdAt: post.createdAt.toString(),
-                updatedAt: post.updatedAt.toString(),
+                posts: {_id: post.id.toString(),
+                        title: post.title.toString(),
+                        content: post.content.toString(),
+                        tags: post.tags,
+                        userId: post.userId.toString(),
+                        createdAt: post.createdAt.toISOString(),
+                        updatedAt: post.updatedAt.toISOString(),
+                    },
+                totalPosts: posts.length,
             }
         })
+
         return posts;
     },
 };

@@ -17,7 +17,7 @@ module.exports = buildSchema(`
         title: String!
         content: String!
         tags: [String!]!
-        creator: User!
+        userId: Int!
         createdAt: String!
         updatedAt: String!
     }
@@ -25,6 +25,11 @@ module.exports = buildSchema(`
     type AutoData {
         token: String!
         userId: String!
+    }
+
+    type PostsData {
+        posts: [Post!]!
+        totalPosts: Int!
     }
     
     input userInputData {
@@ -52,7 +57,7 @@ module.exports = buildSchema(`
 
    type RootQuery {
         signIn(signinInput: signedInUserData): AutoData!
-        fetchAllPosts: [Post!]!
+        fetchAllPosts: PostsData!
     }
 
     schema {
