@@ -116,31 +116,23 @@ module.exports = {
         }
     },
     signIn: async ({signinInput}) => {
+        const user = await User.findOne({ where: {email: signinInput.email} });
+        if (!user) throw userDoesntExistError();
 
-       try {
-           const user = await User.findOne({ where: {email: signinInput.email} });
-            if (!user) throw userDoesntExistError();
+        const isEqual = await bcrypt.compare(signinInput.password, user.password);
+        if (!isEqual) throw userPasswordIsIncorrectError();
 
-            const isEqual = await bcrypt.compare(signinInput.password, user.password);
-            if (!isEqual) throw userPasswordIsIncorrectError();
-
-            const token = jwt.sign(
-                {
+        const token = jwt.sign(
+            {
                 userId: user.id.toString(),
                 email: user.email,
-                }, 
+            }, 
                 'somesupersecretsecret', 
-                { 
+            { 
                     expiresIn:'1h' 
-                }
-            );
-            res.status(200).json({ token: token, userId: user.id.toString() });
-        } catch (err) {
-            if (!err.statusCode) {
-              err.statusCode = 500;
             }
-            next(err);
-        }
+        );
+        return { token: token, userId: user.id.toString() };
     },
     createPost: async ({ postInput }, req) => {
 
