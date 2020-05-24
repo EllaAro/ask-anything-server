@@ -36,7 +36,7 @@ const invalidUserInputError = errors => {
 }
 
 const userDoesntExistError = () => {
-    const error = new Error (`User doesn't exist!`);
+    const error = new Error(`User doesn't exist!`);
     error.code = 401;
 
     return error;
@@ -137,7 +137,6 @@ module.exports = {
     createPost: async ({ postInput }, req) => {
 
         if (!req.isAuto) throw userNotAutoError();
-        
         const user = await User.findByPk(req.userId);
         if (!user) throw userDoesntExistError();
 
@@ -151,7 +150,7 @@ module.exports = {
             title: title,
             content: content,
             tags: tags,
-            userId: user.id
+            userId: req.userId
         });
 
         return {

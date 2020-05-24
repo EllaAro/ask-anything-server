@@ -47,7 +47,7 @@ app.use((error, req, res, next) => {
   res.status(status).json({ message: message, data: data });
 });
 
-sequelize.sync({ force: true })
+sequelize.sync()  //{ force: true }
   .then(() => {
     app.listen(8080);
   })
