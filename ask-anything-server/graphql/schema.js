@@ -17,7 +17,17 @@ module.exports = buildSchema(`
         title: String!
         content: String!
         tags: [String!]!
+        imageUrl: String!
         userId: Int!
+        createdAt: String!
+        updatedAt: String!
+    }
+
+    type Comment {
+        _id: ID!
+        postId: Int!
+        userId: Int!
+        content: String!
         createdAt: String!
         updatedAt: String!
     }
@@ -31,6 +41,11 @@ module.exports = buildSchema(`
         posts: [Post!]!
         totalPosts: Int!
     }
+
+    type CommentsData {
+        comments: [Comment!]!
+        totalComments: Int!
+    }
     
     input userInputData {
         firstName: String!
@@ -43,6 +58,7 @@ module.exports = buildSchema(`
         title: String!
         content: String!
         tags: [String!]!
+        imageUrl: String!
    }
 
    input signedInUserData {
@@ -50,14 +66,25 @@ module.exports = buildSchema(`
         password: String!
    }
 
+   input commentInputData {
+       postId: Int!
+       content: String!
+   }
+
+   input fetchCommentsData {
+       postId: Int!
+   }
+
     type RootMutation {
         createUser(userInput: userInputData): User!
         createPost(postInput: postInputData): Post!
+        createComment(commentInput: commentInputData): Comment!
    }
 
    type RootQuery {
         signIn(signinInput: signedInUserData): AutoData!
         fetchAllPosts: PostsData!
+        fetchAllComments(fetchCommentsInput: fetchCommentsData): CommentsData!
     }
 
     schema {

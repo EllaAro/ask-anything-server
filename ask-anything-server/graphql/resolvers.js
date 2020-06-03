@@ -149,11 +149,11 @@ module.exports = {
   },
   createPost: async ({ postInput }, req) => {
     if (!req.isAuth) throw userNotAutoError();
+
     const user = await User.findByPk(req.userId);
-    // const user = await User.findByPk(1);
     if (!user) throw userDoesntExistError();
 
-    const { title, content, tags } = postInput;
+    const { title, content, tags, imageUrl } = postInput;
 
     if (!isPostTitleValid(title)) throw postTitleInvalidError();
     if (!isPostContentValid(content)) throw postContentInvalidError();
@@ -163,6 +163,7 @@ module.exports = {
       title: title,
       content: content,
       tags: tags,
+      imageUrl: imageUrl,
       userId: req.userId,
     });
 
@@ -171,6 +172,7 @@ module.exports = {
       title: createdPost.title.toString(),
       content: createdPost.content.toString(),
       tags: createdPost.tags,
+      imageUrl: createdPost.imageUrl.toString(),
       userId: createdPost.userId.toString(),
       createdAt: createdPost.createdAt.toISOString(),
       updatedAt: createdPost.updatedAt.toISOString(),
@@ -183,6 +185,7 @@ module.exports = {
       title: post.title.toString(),
       content: post.content.toString(),
       tags: post.tags,
+      imageUrl: post.imageUrl.toString(),
       createdAt: post.createdAt.toISOString(),
       updatedAt: post.updatedAt.toISOString(),
     }));

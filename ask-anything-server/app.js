@@ -1,12 +1,13 @@
-const express = require("express");
-const cors = require("cors");
-const bodyParser = require("body-parser");
-const graphqlHttp = require("express-graphql");
+const express = require("express"),
+  cors = require("cors"),
+  bodyParser = require("body-parser"),
+  graphqlHttp = require("express-graphql");
 
-const { sequelize } = require("./models");
-const graphqlSchema = require("./graphql/schema");
-const graphqlResolver = require("./graphql/resolvers");
-const auth = require("./middleware/auth");
+const { sequelize } = require("./models"),
+  graphqlSchema = require("./graphql/schema"),
+  graphqlResolver = require("./graphql/resolvers"),
+  auth = require("./middleware/auth"),
+  fileRoutes = require("./routes/file-upload");
 
 // return instance of the app
 app = express();
@@ -43,6 +44,9 @@ app.use(
     },
   })
 );
+
+// setting file upload (images upload) route
+app.use("/api/file-upload", fileRoutes);
 
 app.use((error, req, res, next) => {
   const status = error.statusCode || 500;
