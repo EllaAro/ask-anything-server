@@ -2,7 +2,7 @@ const bcrypt = require("bcryptjs");
 const validator = require("validator");
 const jwt = require("jsonwebtoken");
 
-const { Post, User } = require("../models");
+const { Post, User, Comment } = require("../models");
 const {
   EMAIL_LENGTH,
   MIN_VALID_POST_TITLE,
@@ -191,5 +191,65 @@ module.exports = {
     }));
 
     return { posts: posts, totalPosts: posts.length };
+  },
+  fetchPostById: async ({ fetchPostInput }, req) => {
+    const { postId } = fetchPostInput;
+    const post = await Post.find({ where: { postId: postId } });
+    return {
+      _id: post.id.toString(),
+      title: post.title.toString(),
+      content: post.content.toString(),
+      tags: post.tags,
+      imageUrl: post.imageUrl.toString(),
+      createdAt: post.createdAt.toISOString(),
+      updatedAt: post.updatedAt.toISOString(),
+    };
+  },
+  createComment: async ({ commentInput }, req) => {
+    if (!req.isAuth) throw userNotAutoError();
+
+    const user = await User.findByPk(req.userId);
+    if (!user) throw userDoesntExistError();
+
+    const { postId, content } = commentInput;
+
+    let createdComment = await Comment.create({
+      content: content,
+      postId: parseInt(postId),
+      userId: req.userId,
+      firstName: user.firstName,
+      lastName: user.lastName,
+    });
+
+    return {
+      _id: createdComment.id.toString(),
+      content: createdComment.content.toString(),
+      postId: createdComment.postId.toString(),
+      userId: createdComment.userId.toString(),
+      firstName: createdComment.firstName.toString(),
+      lastName: createdComment.lastName.toString(),
+      createdAt: createdComment.createdAt.toISOString(),
+      updatedAt: createdComment.updatedAt.toISOString(),
+    };
+  },
+  fetchAllComments: async ({ fetchCommentsInput }, req) => {
+    const { postId } = fetchCommentsInput;
+
+    const fetchedComments = await Comment.findAll({
+      where: { postId: parseInt(postId) },
+    });
+
+    const comments = fetchedComments.map((comment) => ({
+      _id: comment.id.toString(),
+      userId: comment.userId.toString(),
+      firstName: comment.firstName.toString(),
+      lastName: comment.lastName.toString(),
+      postId: comment.postId.toString(),
+      content: comment.content.toString(),
+      createdAt: comment.createdAt.toISOString(),
+      updatedAt: comment.updatedAt.toISOString(),
+    }));
+
+    return { comments: comments, totalComments: comments.length };
   },
 };

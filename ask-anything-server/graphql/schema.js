@@ -25,8 +25,10 @@ module.exports = buildSchema(`
 
     type Comment {
         _id: ID!
-        postId: Int!
         userId: Int!
+        firstName: String!
+        lastName: String!
+        postId: Int!
         content: String!
         createdAt: String!
         updatedAt: String!
@@ -67,12 +69,12 @@ module.exports = buildSchema(`
    }
 
    input commentInputData {
-       postId: Int!
+       postId: String!
        content: String!
    }
 
    input fetchCommentsData {
-       postId: Int!
+       postId: String!
    }
 
     type RootMutation {

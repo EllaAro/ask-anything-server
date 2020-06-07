@@ -1,14 +1,10 @@
 module.exports = (sequelize, Sequelize) => {
-  const Comment = sequelize.define("comment", {
+  const Like = sequelize.define("like", {
     id: {
       type: Sequelize.INTEGER,
       autoIncrement: true,
       allowNull: false,
       primaryKey: true,
-    },
-    content: {
-      type: Sequelize.STRING,
-      allowNull: false,
     },
     postId: {
       type: Sequelize.INTEGER,
@@ -18,15 +14,7 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.INTEGER,
       allowNull: false,
     },
-    firstName: {
-      type: Sequelize.STRING,
-      allowNull: false,
-    },
-    lastName: {
-      type: Sequelize.STRING,
-      allowNull: false,
-    },
   });
 
-  return Comment;
+  return Like;
 };

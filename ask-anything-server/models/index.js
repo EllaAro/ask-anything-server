@@ -2,6 +2,7 @@ const Sequelize = require("sequelize");
 const UserModel = require("./user");
 const PostModel = require("./post");
 const CommentModel = require("./comment");
+const likeModel = require("./like");
 
 const sequelize = new Sequelize("ask-anything", "postgres", "ellaaronov", {
   host: "localhost",
@@ -17,6 +18,7 @@ const sequelize = new Sequelize("ask-anything", "postgres", "ellaaronov", {
 const User = UserModel(sequelize, Sequelize);
 const Post = PostModel(sequelize, Sequelize);
 const Comment = CommentModel(sequelize, Sequelize);
+const Like = likeModel(sequelize, Sequelize);
 
 Post.belongsTo(User, {
   constraints: true,
@@ -29,8 +31,14 @@ User.hasMany(Post);
 
 User.hasMany(Comment);
 
+User.hasMany(Like);
+
+Post.hasMany(Like);
+
 module.exports = {
   User,
   Post,
+  Comment,
+  Like,
   sequelize,
 };
