@@ -7,5 +7,5 @@ module.exports = {
 
   MIN_VALID_POST_CONTENT: 10,
 
-  MAX_VALID_POST_CONTENT: 150,
+  MAX_VALID_POST_CONTENT: 500,
 };

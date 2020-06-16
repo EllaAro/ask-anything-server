@@ -44,11 +44,23 @@ module.exports = buildSchema(`
         totalPosts: Int!
     }
 
+    type LikesData {
+        postsId: [String!]!
+    }
+
     type CommentsData {
         comments: [Comment!]!
         totalComments: Int!
     }
+
+    type likedPostData {
+        _id: ID!
+    }
     
+    type likesCountData {
+        likesCount: Int!
+    }
+
     input userInputData {
         firstName: String!
         lastName: String!
@@ -74,19 +86,27 @@ module.exports = buildSchema(`
    }
 
    input fetchCommentsData {
-       postId: String!
+        postId: String!
+   }
+
+   input likePostData {
+        postId: String!
    }
 
     type RootMutation {
         createUser(userInput: userInputData): User!
         createPost(postInput: postInputData): Post!
         createComment(commentInput: commentInputData): Comment!
+        likePost(likePostInput: likePostData): likedPostData!
+        unLikePost(likePostInput: likePostData): likedPostData!
    }
 
    type RootQuery {
         signIn(signinInput: signedInUserData): AutoData!
         fetchAllPosts: PostsData!
         fetchAllComments(fetchCommentsInput: fetchCommentsData): CommentsData!
+        numberOfPostLikes(likePostInput: likePostData): likesCountData!
+        fetchLikedPosts: LikesData!
     }
 
     schema {

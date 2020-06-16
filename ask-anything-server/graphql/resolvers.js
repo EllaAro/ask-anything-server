@@ -2,7 +2,7 @@ const bcrypt = require("bcryptjs");
 const validator = require("validator");
 const jwt = require("jsonwebtoken");
 
-const { Post, User, Comment } = require("../models");
+const { Post, User, Comment, Like } = require("../models");
 const {
   EMAIL_LENGTH,
   MIN_VALID_POST_TITLE,
@@ -179,7 +179,7 @@ module.exports = {
     };
   },
   fetchAllPosts: async (args, req) => {
-    const fetchedPosts = await Post.findAll();
+    const fetchedPosts = await Post.findAll({ order: [["createdAt", "DESC"]] });
     const posts = fetchedPosts.map((post) => ({
       _id: post.id.toString(),
       title: post.title.toString(),
@@ -237,6 +237,7 @@ module.exports = {
 
     const fetchedComments = await Comment.findAll({
       where: { postId: parseInt(postId) },
+      order: [["createdAt", "DESC"]],
     });
 
     const comments = fetchedComments.map((comment) => ({
@@ -251,5 +252,51 @@ module.exports = {
     }));
 
     return { comments: comments, totalComments: comments.length };
+  },
+  likePost: async ({ likePostInput }, req) => {
+    if (!req.isAuth) throw userNotAutoError();
+
+    const user = await User.findByPk(req.userId);
+    if (!user) throw userDoesntExistError();
+
+    const { postId } = likePostInput;
+
+    const like = await Like.create({
+      postId: parseInt(postId),
+      userId: user.id,
+    });
+    return { _id: like.id.toString() };
+  },
+  unLikePost: async ({ likePostInput }, req) => {
+    if (!req.isAuth) throw userNotAutoError();
+
+    const user = await User.findByPk(req.userId);
+    if (!user) throw userDoesntExistError();
+
+    const { postId } = likePostInput;
+
+    const like = await Like.findOne({
+      where: { postId: parseInt(postId), userId: user.id },
+    });
+    const likeId = like.id;
+
+    await like.destroy();
+
+    return { _id: likeId.toString() };
+  },
+  numberOfPostLikes: async ({ likePostInput }, req) => {
+    const { postId } = likePostInput;
+
+    const likesCount = await Like.count({
+      where: { postId: parseInt(postId) },
+    });
+
+    return { likesCount: likesCount };
+  },
+  fetchLikedPosts: async (args, req) => {
+    if (!req.isAuth) throw userNotAutoError();
+
+    const user = await User.findByPk(req.userId);
+    if (!user) throw userDoesntExistError();
   },
 };
