@@ -4,102 +4,19 @@ const jwt = require("jsonwebtoken");
 
 const { Post, User, Comment, Like } = require("../models");
 const {
-  EMAIL_LENGTH,
-  MIN_VALID_POST_TITLE,
-  MAX_VALID_POST_TITLE,
-  MIN_VALID_POST_CONTENT,
-  MAX_VALID_POST_CONTENT,
-} = require("../utils/consts");
-
-const inValidEmailErrorMessage = (email) => {
-  if (!validator.isEmail(email)) return { message: "The Email is invalid!" };
-};
-
-const invalidPasswordErrorMessage = (password) => {
-  if (
-    validator.isEmpty(password) ||
-    !validator.isLength(password, { min: EMAIL_LENGTH, max: EMAIL_LENGTH })
-  )
-    return { message: "The password is incorrect!" };
-};
-
-const userInputErrors = ({ email, password }) => {
-  errors = [];
-  if (inValidEmailErrorMessage(email))
-    errors.push(inValidEmailErrorMessage(email));
-  if (invalidPasswordErrorMessage(password))
-    errors.push(invalidPasswordErrorMessage(password));
-
-  return errors;
-};
-
-const invalidUserInputError = (errors) => {
-  let error = new Error("Invalid user input.");
-  error.data = errors;
-  error.code = 422;
-
-  return error;
-};
-
-const userDoesntExistError = () => {
-  const error = new Error(`User doesn't exist!`);
-  error.code = 401;
-
-  return error;
-};
-
-const userAlreadyExistsError = () => {
-  const error = new Error("User already exists!");
-  error.code = 422;
-
-  return error;
-};
-
-const userPasswordIsIncorrectError = () => {
-  const error = new Error("The password you have entered is incorrect!");
-  error.code = 401;
-
-  return error;
-};
-
-const isPostTitleValid = (title) =>
-  title.length >= MIN_VALID_POST_TITLE && title.length <= MAX_VALID_POST_TITLE;
-
-const postTitleInvalidError = () => {
-  const error = new Error("The title you have entered is inalid!");
-  error.code = 401;
-
-  return error;
-};
-
-const isPostContentValid = (content) =>
-  content.length >= MIN_VALID_POST_CONTENT &&
-  content.length <= MAX_VALID_POST_CONTENT;
-
-const postContentInvalidError = () => {
-  const error = new Error("The content you have entered is inalid!");
-  error.code = 401;
-
-  return error;
-};
-
-const isTagsContentValid = (tags) => tags.length > 0;
-
-const postTagsInvalidError = () => {
-  const error = new Error(
-    "The length of the tags it soo short, choose atleast one tag!"
-  );
-  error.code = 401;
-
-  return error;
-};
-
-const userNotAutoError = () => {
-  const error = new Error("User is not authenticated!");
-  error.code = 401;
-
-  return error;
-};
+  userInputErrors,
+  invalidUserInputError,
+  userDoesntExistError,
+  userAlreadyExistsError,
+  userPasswordIsIncorrectError,
+  isPostTitleValid,
+  postTitleInvalidError,
+  isPostContentValid,
+  postContentInvalidError,
+  isTagsContentValid,
+  postTagsInvalidError,
+  userNotAutoError,
+} = require("../utils/errorHandler");
 
 module.exports = {
   createUser: async ({ userInput }) => {
@@ -260,11 +177,18 @@ module.exports = {
     if (!user) throw userDoesntExistError();
 
     const { postId } = likePostInput;
+    let like;
 
-    const like = await Like.create({
-      postId: parseInt(postId),
-      userId: user.id,
+    like = await Like.findOne({
+      where: { postId: parseInt(postId), userId: user.id },
     });
+
+    if (!like) {
+      like = await Like.create({
+        postId: parseInt(postId),
+        userId: user.id,
+      });
+    }
     return { _id: like.id.toString() };
   },
   unLikePost: async ({ likePostInput }, req) => {
@@ -298,5 +222,15 @@ module.exports = {
 
     const user = await User.findByPk(req.userId);
     if (!user) throw userDoesntExistError();
+
+    const userId = user.id;
+
+    const fetchedLikedPostByUserId = Like.findAll({
+      where: { userId: userId },
+    });
+    const likedPostByUserId = fetchedLikedPostByUserId.map((like) =>
+      like.postId.toString()
+    );
+    return { postsId: likedPostByUserId };
   },
 };
