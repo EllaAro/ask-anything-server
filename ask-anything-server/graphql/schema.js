@@ -107,6 +107,7 @@ module.exports = buildSchema(`
         fetchAllComments(fetchCommentsInput: fetchCommentsData): CommentsData!
         numberOfPostLikes(likePostInput: likePostData): likesCountData!
         fetchLikedPosts: LikesData!
+        fetchAllUserPosts: PostsData!
     }
 
     schema {

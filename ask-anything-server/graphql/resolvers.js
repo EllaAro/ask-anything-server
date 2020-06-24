@@ -57,10 +57,7 @@ module.exports = {
         userId: user.id.toString(),
         email: user.email,
       },
-      "somesupersecretsecret",
-      {
-        expiresIn: "1h",
-      }
+      "somesupersecretsecret"
     );
     return { token: token, userId: user.id.toString() };
   },
@@ -97,6 +94,30 @@ module.exports = {
   },
   fetchAllPosts: async (args, req) => {
     const fetchedPosts = await Post.findAll({ order: [["createdAt", "DESC"]] });
+    const posts = fetchedPosts.map((post) => ({
+      _id: post.id.toString(),
+      title: post.title.toString(),
+      content: post.content.toString(),
+      tags: post.tags,
+      imageUrl: post.imageUrl.toString(),
+      createdAt: post.createdAt.toISOString(),
+      updatedAt: post.updatedAt.toISOString(),
+    }));
+
+    return { posts: posts, totalPosts: posts.length };
+  },
+  fetchAllUserPosts: async (args, req) => {
+    if (!req.isAuth) throw userNotAutoError();
+
+    const user = await User.findByPk(req.userId);
+    if (!user) throw userDoesntExistError();
+
+    const userId = user.id;
+
+    const fetchedPosts = await Post.findAll({
+      where: { userId: userId },
+      order: [["createdAt", "DESC"]],
+    });
     const posts = fetchedPosts.map((post) => ({
       _id: post.id.toString(),
       title: post.title.toString(),
