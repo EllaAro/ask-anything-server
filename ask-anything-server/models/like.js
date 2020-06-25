@@ -6,14 +6,6 @@ module.exports = (sequelize, Sequelize) => {
       allowNull: false,
       primaryKey: true,
     },
-    postId: {
-      type: Sequelize.INTEGER,
-      allowNull: false,
-    },
-    userId: {
-      type: Sequelize.INTEGER,
-      allowNull: false,
-    },
   });
 
   return Like;

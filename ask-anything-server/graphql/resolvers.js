@@ -1,5 +1,4 @@
 const bcrypt = require("bcryptjs");
-const validator = require("validator");
 const jwt = require("jsonwebtoken");
 
 const { Post, User, Comment, Like } = require("../models");
@@ -17,6 +16,10 @@ const {
   postTagsInvalidError,
   userNotAutoError,
 } = require("../utils/errorHandler");
+const {
+  createTagsVector,
+  contentBasedFilteringScore,
+} = require("../utils/helperHandler");
 
 module.exports = {
   createUser: async ({ userInput }) => {
@@ -118,6 +121,48 @@ module.exports = {
       where: { userId: userId },
       order: [["createdAt", "DESC"]],
     });
+    const posts = fetchedPosts.map((post) => ({
+      _id: post.id.toString(),
+      title: post.title.toString(),
+      content: post.content.toString(),
+      tags: post.tags,
+      imageUrl: post.imageUrl.toString(),
+      createdAt: post.createdAt.toISOString(),
+      updatedAt: post.updatedAt.toISOString(),
+    }));
+
+    return { posts: posts, totalPosts: posts.length };
+  },
+  fetchRecommendedUserPosts: async (args, req) => {
+    if (!req.isAuth) throw userNotAutoError();
+
+    const user = await User.findByPk(req.userId);
+    if (!user) throw userDoesntExistError();
+
+    const userId = user.id;
+
+    const fetchedUserLikes = await Like.findAll({
+      where: {
+        userId: userId,
+      },
+    });
+
+    const postsIds = fetchedUserLikes.map((like) => like.postId);
+
+    const fetchedUserLikedPosts = await Post.findAll({
+      where: {
+        postId: postsIds,
+      },
+    });
+
+    const tagsVector = createTagsVector(fetchedUserLikedPosts);
+    const fetchedPosts = await Post.findAll();
+
+    fetchedPosts.sort(
+      (p1, p2) =>
+        contentBasedFilteringScore(tagsVector, p2) -
+        contentBasedFilteringScore(tagsVector, p1)
+    );
     const posts = fetchedPosts.map((post) => ({
       _id: post.id.toString(),
       title: post.title.toString(),
