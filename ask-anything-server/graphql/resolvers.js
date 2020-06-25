@@ -17,12 +17,18 @@ const {
   userNotAutoError,
 } = require("../utils/errorHandler");
 const {
-  returnedPostsFormat,
   createTagsVector,
   createLikesVector,
   contentBasedFilteringScore,
   postScoreByLikeCount,
 } = require("../utils/helperHandler");
+const {
+  returnedPostsFormat,
+  createdPostFormat,
+  createdUserFormat,
+  postFormat,
+  createdCommentFormat,
+} = require("../utils/formattingHandler");
 
 module.exports = {
   createUser: async ({ userInput }) => {
@@ -42,14 +48,7 @@ module.exports = {
       password: hashedPwd,
     });
 
-    return {
-      _id: createdUser.id.toString(),
-      firstName: createdUser.firstName.toString(),
-      lastName: createdUser.lastName.toString(),
-      email: createdUser.email.toString(),
-      createdAt: createdUser.createdAt.toISOString(),
-      updatedAt: createdUser.updatedAt.toISOString(),
-    };
+    return createdUserFormat(createdUser);
   },
   signIn: async ({ signinInput }) => {
     const user = await User.findOne({ where: { email: signinInput.email } });
@@ -87,16 +86,7 @@ module.exports = {
       userId: req.userId,
     });
 
-    return {
-      _id: createdPost.id.toString(),
-      title: createdPost.title.toString(),
-      content: createdPost.content.toString(),
-      tags: createdPost.tags,
-      imageUrl: createdPost.imageUrl.toString(),
-      userId: createdPost.userId.toString(),
-      createdAt: createdPost.createdAt.toISOString(),
-      updatedAt: createdPost.updatedAt.toISOString(),
-    };
+    return createdPostFormat(createdPost);
   },
   fetchAllPosts: async (args, req) => {
     const fetchedPosts = await Post.findAll({ order: [["createdAt", "DESC"]] });
@@ -173,15 +163,8 @@ module.exports = {
   fetchPostById: async ({ fetchPostInput }, req) => {
     const { postId } = fetchPostInput;
     const post = await Post.find({ where: { postId: postId } });
-    return {
-      _id: post.id.toString(),
-      title: post.title.toString(),
-      content: post.content.toString(),
-      tags: post.tags,
-      imageUrl: post.imageUrl.toString(),
-      createdAt: post.createdAt.toISOString(),
-      updatedAt: post.updatedAt.toISOString(),
-    };
+
+    return postFormat(post);
   },
   createComment: async ({ commentInput }, req) => {
     if (!req.isAuth) throw userNotAutoError();
@@ -199,16 +182,7 @@ module.exports = {
       lastName: user.lastName,
     });
 
-    return {
-      _id: createdComment.id.toString(),
-      content: createdComment.content.toString(),
-      postId: createdComment.postId.toString(),
-      userId: createdComment.userId.toString(),
-      firstName: createdComment.firstName.toString(),
-      lastName: createdComment.lastName.toString(),
-      createdAt: createdComment.createdAt.toISOString(),
-      updatedAt: createdComment.updatedAt.toISOString(),
-    };
+    return createdCommentFormat(createdComment);
   },
   fetchAllComments: async ({ fetchCommentsInput }, req) => {
     const { postId } = fetchCommentsInput;
@@ -218,16 +192,9 @@ module.exports = {
       order: [["createdAt", "DESC"]],
     });
 
-    const comments = fetchedComments.map((comment) => ({
-      _id: comment.id.toString(),
-      userId: comment.userId.toString(),
-      firstName: comment.firstName.toString(),
-      lastName: comment.lastName.toString(),
-      postId: comment.postId.toString(),
-      content: comment.content.toString(),
-      createdAt: comment.createdAt.toISOString(),
-      updatedAt: comment.updatedAt.toISOString(),
-    }));
+    const comments = fetchedComments.map((comment) =>
+      createdCommentFormat(comment)
+    );
 
     return { comments: comments, totalComments: comments.length };
   },
