@@ -15,11 +15,12 @@ module.exports = {
     return tagUserVector;
   },
   contentBasedFilteringScore: (tagVector, post) => {
-    let postScore;
-    post.tags.forEach(
-      (tag) =>
-        (postScore = tagVector[tag] ? postScore + tagVector[tag] : postScore)
-    );
+    const postTags = post.tags;
+    let postScore = 0;
+
+    postTags.forEach((tag) => {
+      postScore += tagVector[tag] ? Math.pow(tagVector[tag], 2) : 0;
+    });
 
     return postScore;
   },

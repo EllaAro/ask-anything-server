@@ -1,7 +1,7 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
-const { Post, User, Comment, Like } = require("../models");
+const { Post, User, Comment, Like, Op } = require("../models");
 const {
   userInputErrors,
   invalidUserInputError,
@@ -151,7 +151,9 @@ module.exports = {
 
     const fetchedUserLikedPosts = await Post.findAll({
       where: {
-        postId: postsIds,
+        id: {
+          [Op.in]: postsIds,
+        },
       },
     });
 

@@ -1,4 +1,5 @@
 const Sequelize = require("sequelize");
+const Op = Sequelize.Op;
 const UserModel = require("./user");
 const PostModel = require("./post");
 const CommentModel = require("./comment");
@@ -41,4 +42,5 @@ module.exports = {
   Comment,
   Like,
   sequelize,
+  Op,
 };
