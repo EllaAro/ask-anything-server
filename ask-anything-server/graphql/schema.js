@@ -109,6 +109,7 @@ module.exports = buildSchema(`
         fetchLikedPosts: LikesData!
         fetchAllUserPosts: PostsData!
         fetchRecommendedUserPosts: PostsData!
+        fetchTrendingPosts: PostsData!
     }
 
     schema {

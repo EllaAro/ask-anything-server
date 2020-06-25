@@ -14,6 +14,16 @@ module.exports = {
 
     return tagUserVector;
   },
+  createLikesVector: (likes) => {
+    const likesVector = {};
+    likes.forEach((like) => {
+      likesVector[like.postId] = likesVector[like.postId]
+        ? likesVector[like.postId] + 1
+        : 1;
+    });
+
+    return likesVector;
+  },
   contentBasedFilteringScore: (tagVector, post) => {
     const postTags = post.tags;
     let postScore = 0;
@@ -24,4 +34,6 @@ module.exports = {
 
     return postScore;
   },
+  postScoreByLikeCount: (likesVector, post) =>
+    likesVector[post.id] ? likesVector[post.id] : 0,
 };

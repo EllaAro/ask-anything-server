@@ -18,7 +18,9 @@ const {
 } = require("../utils/errorHandler");
 const {
   createTagsVector,
+  createLikesVector,
   contentBasedFilteringScore,
+  postScoreByLikeCount,
 } = require("../utils/helperHandler");
 
 module.exports = {
@@ -164,6 +166,28 @@ module.exports = {
       (p1, p2) =>
         contentBasedFilteringScore(tagsVector, p2) -
         contentBasedFilteringScore(tagsVector, p1)
+    );
+    const posts = fetchedPosts.map((post) => ({
+      _id: post.id.toString(),
+      title: post.title.toString(),
+      content: post.content.toString(),
+      tags: post.tags,
+      imageUrl: post.imageUrl.toString(),
+      createdAt: post.createdAt.toISOString(),
+      updatedAt: post.updatedAt.toISOString(),
+    }));
+
+    return { posts: posts, totalPosts: posts.length };
+  },
+  fetchTrendingPosts: async (args, req) => {
+    const likes = await Like.findAll();
+    const likesVector = createLikesVector(likes);
+    const fetchedPosts = await Post.findAll();
+
+    fetchedPosts.sort(
+      (p1, p2) =>
+        postScoreByLikeCount(likesVector, p2) -
+        postScoreByLikeCount(likesVector, p1)
     );
     const posts = fetchedPosts.map((post) => ({
       _id: post.id.toString(),
