@@ -17,6 +17,7 @@ const {
   userNotAutoError,
 } = require("../utils/errorHandler");
 const {
+  returnedPostsFormat,
   createTagsVector,
   createLikesVector,
   contentBasedFilteringScore,
@@ -99,15 +100,7 @@ module.exports = {
   },
   fetchAllPosts: async (args, req) => {
     const fetchedPosts = await Post.findAll({ order: [["createdAt", "DESC"]] });
-    const posts = fetchedPosts.map((post) => ({
-      _id: post.id.toString(),
-      title: post.title.toString(),
-      content: post.content.toString(),
-      tags: post.tags,
-      imageUrl: post.imageUrl.toString(),
-      createdAt: post.createdAt.toISOString(),
-      updatedAt: post.updatedAt.toISOString(),
-    }));
+    const posts = returnedPostsFormat(fetchedPosts);
 
     return { posts: posts, totalPosts: posts.length };
   },
@@ -123,15 +116,7 @@ module.exports = {
       where: { userId: userId },
       order: [["createdAt", "DESC"]],
     });
-    const posts = fetchedPosts.map((post) => ({
-      _id: post.id.toString(),
-      title: post.title.toString(),
-      content: post.content.toString(),
-      tags: post.tags,
-      imageUrl: post.imageUrl.toString(),
-      createdAt: post.createdAt.toISOString(),
-      updatedAt: post.updatedAt.toISOString(),
-    }));
+    const posts = returnedPostsFormat(fetchedPosts);
 
     return { posts: posts, totalPosts: posts.length };
   },
@@ -167,15 +152,7 @@ module.exports = {
         contentBasedFilteringScore(tagsVector, p2) -
         contentBasedFilteringScore(tagsVector, p1)
     );
-    const posts = fetchedPosts.map((post) => ({
-      _id: post.id.toString(),
-      title: post.title.toString(),
-      content: post.content.toString(),
-      tags: post.tags,
-      imageUrl: post.imageUrl.toString(),
-      createdAt: post.createdAt.toISOString(),
-      updatedAt: post.updatedAt.toISOString(),
-    }));
+    const posts = returnedPostsFormat(fetchedPosts);
 
     return { posts: posts, totalPosts: posts.length };
   },
@@ -189,15 +166,7 @@ module.exports = {
         postScoreByLikeCount(likesVector, p2) -
         postScoreByLikeCount(likesVector, p1)
     );
-    const posts = fetchedPosts.map((post) => ({
-      _id: post.id.toString(),
-      title: post.title.toString(),
-      content: post.content.toString(),
-      tags: post.tags,
-      imageUrl: post.imageUrl.toString(),
-      createdAt: post.createdAt.toISOString(),
-      updatedAt: post.updatedAt.toISOString(),
-    }));
+    const posts = returnedPostsFormat(fetchedPosts);
 
     return { posts: posts, totalPosts: posts.length };
   },

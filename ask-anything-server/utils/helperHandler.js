@@ -1,4 +1,15 @@
 module.exports = {
+  returnedPostsFormat: (fetchedPosts) => {
+    return fetchedPosts.map((post) => ({
+      _id: post.id.toString(),
+      title: post.title.toString(),
+      content: post.content.toString(),
+      tags: post.tags,
+      imageUrl: post.imageUrl.toString(),
+      createdAt: post.createdAt.toISOString(),
+      updatedAt: post.updatedAt.toISOString(),
+    }));
+  },
   createTagsVector: (posts) => {
     const tagUserVector = {};
     let postTags;
