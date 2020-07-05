@@ -9,3 +9,6 @@ These next technologies are the ones used in this project:
 * GraphQL (REST)
 * PostgreSQL
 * Sequelize.js
+## Local Setting
+### Getting Started
+These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
